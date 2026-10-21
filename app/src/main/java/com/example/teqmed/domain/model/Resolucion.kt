@@ -1,4 +1,5 @@
 package com.example.teqmed.domain.model
+import java.time.LocalDateTime
 
 enum class DecisionValidacion { VALIDADO, OBSERVADO, RECHAZADO }
 

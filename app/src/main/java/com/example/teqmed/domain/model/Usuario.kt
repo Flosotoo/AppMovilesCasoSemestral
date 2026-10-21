@@ -1,10 +1,6 @@
 package com.example.teqmed.domain.model
 
-enum class CodigoRol { TECNICO, JEFE, GERENCIA, ADMIN }
-
-enum class CodigoPermiso {
-    REGISTRAR_TRASLADO, VALIDAR_TRASLADO, VER_COSTOS, ADMIN_MAESTROS, ADMIN_USUARIOS
-}
+import java.time.LocalDateTime
 
 data class Rol(
     val id: Long = 0,
@@ -26,4 +22,25 @@ data class Usuario(
 ) {
     fun estaHabilitado(): Boolean = activo
     fun puede(p: CodigoPermiso): Boolean = activo && rol.concede(p)
+}
+
+/** Lo que queda en memoria tras autenticar. Nunca guarda la clave. */
+data class Sesion(
+    val usuarioId: Long,
+    val nombre: String,
+    val rol: CodigoRol,
+    val permisos: Set<CodigoPermiso>,
+    val iniciadaEn: LocalDateTime = LocalDateTime.now()
+) {
+    fun puede(p: CodigoPermiso): Boolean = permisos.contains(p)
+
+    companion object {
+        /** El rol y los permisos vienen del usuario que trajo la base. */
+        fun desde(u: Usuario) = Sesion(
+            usuarioId = u.id,
+            nombre = u.nombre,
+            rol = u.rol.codigo,
+            permisos = u.rol.permisos
+        )
+    }
 }
