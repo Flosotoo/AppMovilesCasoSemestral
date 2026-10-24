@@ -3,17 +3,16 @@ package com.example.teqmed.domain.calculo
 import com.example.teqmed.domain.model.PropiedadVehiculo
 
 /**
- * Entrada del motor de valorizacion. Trae TODO lo que el calculo necesita,
- * de modo que CalculadoraCosto no consulta base de datos ni red.
+ * Entrada del motor de valorizacion unificado con CNE (RN02).
  */
 data class SolicitudCalculo(
     val kilometrosDeclarados: Double,
     val distanciaOficialKm: Double,
     val propiedad: PropiedadVehiculo,
-    val rendimientoKmL: Double,        // km por litro (NO litros/100km)
+    val rendimientoKmL: Double,        // km por litro (tanto empresa como particular)
     val montoPeaje: Int,
-    val precioLitroVigente: Double,
-    val tarifaReembolsoKm: Double,
+    val precioLitroVigente: Double,    // precio CNE obtenido online o via fallback Room
+    val tarifaReembolsoKm: Double = 0.0, // mantenido por compatibilidad
     val umbralDesviacionPct: Double = 10.0
 ) {
     fun esValida(): Boolean =

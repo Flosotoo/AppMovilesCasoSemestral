@@ -2,37 +2,24 @@ package com.example.teqmed.domain.calculo
 
 import com.example.teqmed.domain.error.ErrorDominio
 import com.example.teqmed.domain.error.fallar
-import com.example.teqmed.domain.model.PropiedadVehiculo
 import com.example.teqmed.domain.model.ResultadoValorizacion
 
 /**
- * Motor de valorizacion (EP03). Unico punto de calculo del sistema.
- *
- * No conoce Room, ni Compose, ni la red: por eso se puede probar
- * con JUnit sin levantar la app, y por eso el costo es auditable.
- *
- * RN02:
- *   Empresa     C = (D / R) * P_litro + peajes
- *   Particular  C = (D * T_km) + peajes
- *
- * Nunca lanza: todo fallo vuelve como Result.failure(ErrorDominio).
+ * Motor de valorizacion unificado (EP03, RN02).
+ * Formula unica de combustible para todos los vehiculos:
+ *     C = (D / R) * P_litro_CNE + peajes
  */
 object CalculadoraCosto {
 
     fun calcular(s: SolicitudCalculo): Result<ResultadoValorizacion> {
 
-        if (s.rendimientoKmL <= 0 && s.propiedad == PropiedadVehiculo.EMPRESA) {
+        if (s.rendimientoKmL <= 0) {
             return fallar(ErrorDominio.Negocio.RendimientoInvalido("sin patente"))
         }
         if (s.distanciaOficialKm <= 0) {
             return fallar(ErrorDominio.Negocio.DistanciaOficialNoDefinida("seleccionado"))
         }
-        // Cada regimen solo necesita su propio parametro tarifario (RF-16)
-        val tarifaFaltante = when (s.propiedad) {
-            PropiedadVehiculo.EMPRESA -> s.precioLitroVigente <= 0
-            PropiedadVehiculo.PARTICULAR -> s.tarifaReembolsoKm <= 0
-        }
-        if (tarifaFaltante) {
+        if (s.precioLitroVigente <= 0) {
             return fallar(ErrorDominio.Negocio.TarifasNoVigentes)
         }
         if (!s.esValida()) {
@@ -59,8 +46,8 @@ object CalculadoraCosto {
                 costoCombustibleOReembolso = costoBase,
                 montoPeaje = s.montoPeaje,
                 costoTotal = total,
-                precioLitroAplicado = s.precioLitroVigente,   // congelado - RF-17
-                tarifaKmAplicada = s.tarifaReembolsoKm,       // congelado - RF-17
+                precioLitroAplicado = s.precioLitroVigente,   // congelado CNE - RF-17
+                tarifaKmAplicada = 0.0,
                 reglaAplicada = regla.descripcion,
                 desviacion = desviacion
             )
