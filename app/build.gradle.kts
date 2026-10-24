@@ -56,4 +56,14 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     kapt("androidx.room:room-compiler:2.6.1")
+
+    // Navegación Jetpack Compose
+    implementation("androidx.navigation:navigation-compose:2.8.5")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.7")
+
+    // Iconos extendidos Material 3 (manejado por compose.bom)
+    implementation("androidx.compose.material:material-icons-extended")
+
+    // Recurso Nativo 1: GPS Play Services Location
+    implementation("com.google.android.gms:play-services-location:21.3.0")
 }
