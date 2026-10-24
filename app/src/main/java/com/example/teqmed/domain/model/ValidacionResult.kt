@@ -8,6 +8,8 @@ data class ValidacionResult(
     val esExitoso: Boolean,
     val mensajeError: String? = null
 ) {
+    val esValido: Boolean get() = esExitoso
+
     companion object {
         fun ok(): ValidacionResult = ValidacionResult(esExitoso = true)
         fun error(mensaje: String): ValidacionResult =
