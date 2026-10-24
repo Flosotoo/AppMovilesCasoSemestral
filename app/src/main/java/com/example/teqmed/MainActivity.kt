@@ -27,6 +27,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import com.example.teqmed.data.local.DatosIniciales
 import com.example.teqmed.data.local.DestinoEntity
 import com.example.teqmed.data.local.SessionManager
 import com.example.teqmed.data.local.TeqRutaDatabase
@@ -61,6 +65,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val db = TeqRutaDatabase.getDatabase(applicationContext)
+        lifecycleScope.launch(Dispatchers.IO) {
+            DatosIniciales.sembrar(db)
+        }
         val sessionManager = SessionManager(applicationContext)
         val tarifaRepo = TarifaCombustibleRepository(ClienteTarifaCneHttp(), db.parametroSistemaDao())
 

@@ -68,7 +68,7 @@ object DatosIniciales {
                     rut = "33333333-3",
                     nombre = "Juan Perez (Tecnico Terreno)",
                     email = "tecnico@teqmed.cl",
-                    hashClave = "tec123",
+                    hashClave = "tecnico123",
                     rolId = rolTecnicoId,
                     activo = true,
                     primerAcceso = false,
@@ -80,13 +80,23 @@ object DatosIniciales {
                     rut = "44444444-4",
                     nombre = "Sofia Valenzuela (Gerencia)",
                     email = "gerencia@teqmed.cl",
-                    hashClave = "ger123",
+                    hashClave = "gerencia123",
                     rolId = rolGerenciaId,
                     activo = true,
                     primerAcceso = false,
                     consentimientoUbicacion = true
                 )
             )
+        }
+
+        // Actualizar claves si la BD fue creada previamente con la semilla abreviada tec123
+        val uTec = db.usuarioDao().obtenerPorEmail("tecnico@teqmed.cl")
+        if (uTec != null && uTec.hashClave != "tecnico123") {
+            db.usuarioDao().actualizar(uTec.copy(hashClave = "tecnico123"))
+        }
+        val uGer = db.usuarioDao().obtenerPorEmail("gerencia@teqmed.cl")
+        if (uGer != null && uGer.hashClave != "gerencia123") {
+            db.usuarioDao().actualizar(uGer.copy(hashClave = "gerencia123"))
         }
 
         // 3. Vehículos de prueba

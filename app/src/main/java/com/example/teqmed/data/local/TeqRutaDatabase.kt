@@ -52,19 +52,15 @@ abstract class TeqRutaDatabase : RoomDatabase() {
                     TeqRutaDatabase::class.java,
                     "teqruta_local.db"
                 )
-                    .addCallback(object : Callback() {
-                        override fun onCreate(db: SupportSQLiteDatabase) {
-                            super.onCreate(db)
-                            // Al crear la BD por primera vez, sembramos datos iniciales
-                            CoroutineScope(Dispatchers.IO).launch {
-                                INSTANCE?.let { database ->
-                                    DatosIniciales.sembrar(database)
-                                }
-                            }
-                        }
-                    })
+                    .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
+
+                // Garantizar la siembra inicial inmediatamente en background
+                CoroutineScope(Dispatchers.IO).launch {
+                    DatosIniciales.sembrar(instance)
+                }
+
                 instance
             }
         }
