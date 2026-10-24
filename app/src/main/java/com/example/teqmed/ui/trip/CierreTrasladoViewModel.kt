@@ -146,8 +146,8 @@ class CierreTrasladoViewModel(
                             timestampGpsFin = System.currentTimeMillis(),
                             montoPeajes = montoTotalPeajes,
                             costoTotal = resultadoCalculo.costoTotal,
-                            precioLitroAplicado = if (propiedadVehiculo == PropiedadVehiculo.EMPRESA) precioLitro else null,
-                            tarifaKmAplicada = if (propiedadVehiculo == PropiedadVehiculo.PARTICULAR) tarifaReembolsoKm else null,
+                            precioLitroAplicado = precioLitro,
+                            tarifaKmAplicada = null,
                             porcentajeDesviacion = resultadoCalculo.desviacion.porcentajeConSigno,
                             desviacionDetectada = resultadoCalculo.desviacion.superaUmbral,
                             estado = "FINALIZADO"
