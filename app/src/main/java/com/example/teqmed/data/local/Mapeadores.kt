@@ -47,7 +47,7 @@ object Mapeadores {
             marca = entity.marca,
             modelo = entity.modelo,
             propiedad = try { PropiedadVehiculo.valueOf(entity.propiedad) } catch (_: Exception) { PropiedadVehiculo.EMPRESA },
-            tipoCombustible = try { TipoCombustible.valueOf(entity.tipoCombustible) } catch (_: Exception) { TipoCombustible.BENZINA_95 },
+            tipoCombustible = try { TipoCombustible.valueOf(entity.tipoCombustible) } catch (_: Exception) { TipoCombustible.GASOLINA_95 },
             rendimientoKmL = entity.rendimientoKmL,
             activo = entity.activo,
             actualizadoEn = entity.actualizadoEn
