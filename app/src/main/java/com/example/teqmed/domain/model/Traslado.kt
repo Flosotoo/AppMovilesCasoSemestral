@@ -1,75 +1,92 @@
 package com.example.teqmed.domain.model
 
-import com.example.teqmed.domain.error.ErrorDominio
-import java.time.LocalDateTime
-
-enum class MomentoCaptura { INICIO, CIERRE }
-
-data class Ubicacion(
-    val latitud: Double,
-    val longitud: Double,
-    val momento: MomentoCaptura,
-    val capturadaEn: LocalDateTime = LocalDateTime.now()
-)
+import java.util.UUID
 
 /**
- * Inmutable: los métodos no modifican el objeto, devuelven uno nuevo con copy().
- * Es lo que después hace que StateFlow funcione sin sorpresas.
+ * Entidad central del negocio (EP02, EP03, EP04, EP05).
+ *
+ * Inmutable: los metodos devuelven una copia nueva en vez de mutar.
+ * Eso mantiene el StateFlow predecible y permite explicar la maquina de
+ * estados en vivo sin efectos colaterales.
+ *
+ * Las tarifas aplicadas quedan CONGELADAS (RF-17): un traslado de octubre
+ * no cambia de monto si en noviembre sube el precio del litro.
  */
 data class Traslado(
-    val id: Long = 0,
-    val codigo: String,
+    val id: String = UUID.randomUUID().toString(),
     val tecnicoId: Long,
-    val vehiculoId: Long,
+    val vehiculoPatente: String,
     val destinoId: Long,
-    val fechaInicio: LocalDateTime,
+
+    val timestampInicio: Long,
+    val timestampFin: Long? = null,
+
     val odometroInicial: Double,
-    val fechaCierre: LocalDateTime? = null,
     val odometroFinal: Double? = null,
-    val estado: EstadoTraslado = EstadoTraslado.EN_CURSO,
-    val ubicacionInicio: Ubicacion? = null,
+
+    val ubicacionInicio: UbicacionPuntual? = null,
+    val ubicacionFin: UbicacionPuntual? = null,
+
+    val montoPeajes: Int = 0,
+    val evidenciaPeaje: EvidenciaPeaje? = null,
+
     val costoTotal: Double? = null,
-    val sincronizado: Boolean = false,
-    val resolucion: Resolucion? = null
+    val precioLitroAplicado: Double? = null,
+    val tarifaKmAplicada: Double? = null,
+
+    val porcentajeDesviacion: Double? = null,
+    val desviacionDetectada: Boolean = false,
+
+    val estado: EstadoTraslado = EstadoTraslado.EN_CURSO,
+    val estadoSincronizacion: EstadoSincronizacion = EstadoSincronizacion.PENDIENTE_OFFLINE,
+
+    val resolucion: ResolucionJefatura? = null
 ) {
 
-    /** null mientras el traslado no se cierra. */
-    val distanciaDeclarada: Double?
-        get() = odometroFinal?.let { it - odometroInicial }
+    /** D declarada = odometro final - odometro inicial. Null si sigue abierto. */
+    fun distanciaDeclarada(): Double? =
+        odometroFinal?.let { it - odometroInicial }
 
-    val estaEnCurso: Boolean get() = estado == EstadoTraslado.EN_CURSO
+    fun estaEnCurso(): Boolean = estado == EstadoTraslado.EN_CURSO
+    fun puedeResolverse(): Boolean = estado == EstadoTraslado.FINALIZADO
+    fun estaPendienteDeEnvio(): Boolean =
+        estadoSincronizacion == EstadoSincronizacion.PENDIENTE_OFFLINE
 
+    /**
+     * Check-out. Recibe el resultado ya valorizado por CalculadoraCosto:
+     * el traslado no calcula, solo guarda lo que el dominio determino.
+     */
     fun cerrar(
         odometroFinal: Double,
-        fecha: LocalDateTime = LocalDateTime.now()
-    ): Result<Traslado> {
-        if (!estaEnCurso)
-            return Result.failure(ErrorDominio.EstadoNoPermite(estado, "cerrar"))
-        if (odometroFinal <= odometroInicial)
-            return Result.failure(ErrorDominio.OdometroInvalido(odometroInicial, odometroFinal))
+        montoPeajes: Int,
+        evidencia: EvidenciaPeaje?,
+        ubicacionFin: UbicacionPuntual?,
+        valorizacion: ResultadoValorizacion,
+        timestampFin: Long = System.currentTimeMillis()
+    ): Traslado = copy(
+        odometroFinal = odometroFinal,
+        montoPeajes = montoPeajes,
+        evidenciaPeaje = evidencia,
+        ubicacionFin = ubicacionFin,
+        timestampFin = timestampFin,
+        costoTotal = valorizacion.costoTotal,
+        precioLitroAplicado = valorizacion.precioLitroAplicado,
+        tarifaKmAplicada = valorizacion.tarifaKmAplicada,
+        porcentajeDesviacion = valorizacion.desviacion.porcentajeConSigno,
+        desviacionDetectada = valorizacion.desviacion.superaUmbral,
+        estado = EstadoTraslado.FINALIZADO
+    )
 
-        return Result.success(
-            copy(
-                odometroFinal = odometroFinal,
-                fechaCierre = fecha,
-                estado = EstadoTraslado.FINALIZADO
-            )
-        )
-    }
-
-    fun resolver(r: Resolucion): Result<Traslado> {
-        if (estado != EstadoTraslado.FINALIZADO)
-            return Result.failure(ErrorDominio.EstadoNoPermite(estado, "resolver"))
-        if (r.exigeComentario && r.comentario.isBlank())
-            return Result.failure(ErrorDominio.ComentarioRequerido)
-
+    /** Aplica la resolucion de jefatura (RF-24). */
+    fun aplicarResolucion(r: ResolucionJefatura): Traslado {
         val nuevoEstado = when (r.decision) {
-            DecisionValidacion.VALIDADO  -> EstadoTraslado.VALIDADO
+            DecisionValidacion.VALIDADO -> EstadoTraslado.VALIDADO
             DecisionValidacion.OBSERVADO -> EstadoTraslado.OBSERVADO
             DecisionValidacion.RECHAZADO -> EstadoTraslado.RECHAZADO
         }
-        return Result.success(copy(estado = nuevoEstado, resolucion = r))
+        return copy(estado = nuevoEstado, resolucion = r)
     }
 
-    fun marcarSincronizado(): Traslado = copy(sincronizado = true)
+    fun marcarSincronizado(): Traslado =
+        copy(estadoSincronizacion = EstadoSincronizacion.SINCRONIZADO)
 }

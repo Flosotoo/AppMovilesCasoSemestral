@@ -1,6 +1,11 @@
 package com.example.teqmed.domain.model
 
-import java.time.LocalDateTime
+/** RBAC relacional (EP01). El rol llega desde las tablas roles y rol_permiso. */
+data class Permiso(
+    val id: Long = 0,
+    val codigo: CodigoPermiso,
+    val descripcion: String
+)
 
 data class Rol(
     val id: Long = 0,
@@ -18,27 +23,31 @@ data class Usuario(
     val email: String,
     val rol: Rol,
     val activo: Boolean = true,
-    val primerAcceso: Boolean = true
+    val primerAcceso: Boolean = true,
+    val creadoPor: Long? = null,
+    val consentimientoUbicacion: Boolean = false   // RF-38
 ) {
     fun estaHabilitado(): Boolean = activo
     fun puede(p: CodigoPermiso): Boolean = activo && rol.concede(p)
+
+    /** Baja logica (RF-35). Nunca se borra: dejaria traslados sin autor. */
+    fun desactivar(): Usuario = copy(activo = false)
+    fun activar(): Usuario = copy(activo = true)
 }
 
-/** Lo que queda en memoria tras autenticar. Nunca guarda la clave. */
-data class Sesion(
+/** Sesion en memoria. Nunca guarda la clave. Resuelve la navegacion (RF-37). */
+data class SesionActiva(
     val usuarioId: Long,
-    val nombre: String,
+    val nombreUsuario: String,
     val rol: CodigoRol,
-    val permisos: Set<CodigoPermiso>,
-    val iniciadaEn: LocalDateTime = LocalDateTime.now()
+    val permisos: Set<CodigoPermiso>
 ) {
     fun puede(p: CodigoPermiso): Boolean = permisos.contains(p)
 
     companion object {
-        /** El rol y los permisos vienen del usuario que trajo la base. */
-        fun desde(u: Usuario) = Sesion(
+        fun desde(u: Usuario) = SesionActiva(
             usuarioId = u.id,
-            nombre = u.nombre,
+            nombreUsuario = u.nombre,
             rol = u.rol.codigo,
             permisos = u.rol.permisos
         )
