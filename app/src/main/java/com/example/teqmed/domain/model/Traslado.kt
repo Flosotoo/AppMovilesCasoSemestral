@@ -17,6 +17,7 @@ data class Traslado(
     val tecnicoId: Long,
     val vehiculoPatente: String,
     val destinoId: Long,
+    val sentido: SentidoTraslado = SentidoTraslado.IDA,
 
     val timestampInicio: Long,
     val timestampFin: Long? = null,

@@ -7,8 +7,6 @@ data class Destino(
     val nombreCliente: String,
     val tipoRecinto: TipoCliente,
     val comuna: String,
-    val latitudReferencia: Double? = null,
-    val longitudReferencia: Double? = null,
     val distanciaOficialKm: Double,
     val montoPeajeEstandar: Int = 0,
     val activo: Boolean = true,
