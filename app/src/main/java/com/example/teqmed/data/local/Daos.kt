@@ -189,10 +189,17 @@ interface TrasladoDao {
 
     @Query("""
         SELECT * FROM traslados 
-        WHERE timestamp_inicio >= :desde AND timestamp_inicio <= :hasta AND estado IN ('FINALIZADO', 'VALIDADO')
+        WHERE timestamp_inicio >= :desde AND timestamp_inicio <= :hasta AND estado IN ('FINALIZADO', 'VALIDADO', 'OBSERVADO', 'RECHAZADO')
         ORDER BY timestamp_inicio DESC
     """)
     suspend fun obtenerParaReportes(desde: Long, hasta: Long): List<TrasladoEntity>
+
+    @Query("""
+        SELECT * FROM traslados 
+        WHERE timestamp_inicio >= :desde AND timestamp_inicio <= :hasta AND estado IN ('FINALIZADO', 'VALIDADO', 'OBSERVADO', 'RECHAZADO')
+        ORDER BY timestamp_inicio DESC
+    """)
+    fun observarParaReportes(desde: Long, hasta: Long): Flow<List<TrasladoEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(traslado: TrasladoEntity)

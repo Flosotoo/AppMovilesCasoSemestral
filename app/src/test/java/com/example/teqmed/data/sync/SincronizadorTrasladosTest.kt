@@ -33,6 +33,9 @@ class FakeTrasladoDaoParaSync : TrasladoDao {
     override suspend fun obtenerParaReportes(desde: Long, hasta: Long): List<TrasladoEntity> =
         traslados.values.filter { it.timestampInicio in desde..hasta && (it.estado == "FINALIZADO" || it.estado == "VALIDADO") }
 
+    override fun observarParaReportes(desde: Long, hasta: Long): Flow<List<TrasladoEntity>> =
+        flowOf(traslados.values.filter { it.timestampInicio in desde..hasta && (it.estado == "FINALIZADO" || it.estado == "VALIDADO") })
+
     override suspend fun insertar(traslado: TrasladoEntity) {
         traslados[traslado.id] = traslado
     }

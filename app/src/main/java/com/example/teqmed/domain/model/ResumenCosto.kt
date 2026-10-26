@@ -6,7 +6,7 @@ data class FiltroPeriodo(
     val timestampDesde: Long,
     val timestampHasta: Long
 ) {
-    fun esValido(): Boolean = timestampDesde < timestampHasta
+    fun esValido(): Boolean = timestampDesde <= timestampHasta
     fun contiene(t: Long): Boolean = t in timestampDesde..timestampHasta
 }
 

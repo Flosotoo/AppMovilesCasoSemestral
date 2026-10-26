@@ -306,14 +306,19 @@ fun TeqRutaApp(
                     }
 
                     CodigoRol.GERENCIA -> {
-                        val destinosFlow = remember { db.destinoDao().obtenerTodos() }
-                        val destinosList by destinosFlow.collectAsState(initial = emptyList())
-                        val destinosMap = remember(destinosList) { destinosList.associateBy { it.id } }
+                        val reportesViewModel = remember {
+                            com.example.teqmed.ui.gerencia.ReportesGerenciaViewModel(
+                                trasladoDao = db.trasladoDao(),
+                                destinoDao = db.destinoDao(),
+                                usuarioDao = db.usuarioDao(),
+                                vehiculoDao = db.vehiculoDao()
+                            )
+                        }
 
                         GerenciaHomeScreen(
                             gerenteNombre = sesion.nombre,
-                            trasladosFlow = remember { db.trasladoDao().obtenerTodos() },
-                            destinosMap = destinosMap
+                            viewModel = reportesViewModel,
+                            onCerrarSesion = { sessionManager.cerrarSesion() }
                         )
                     }
                 }
