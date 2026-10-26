@@ -55,12 +55,6 @@ abstract class TeqRutaDatabase : RoomDatabase() {
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance
-
-                // Garantizar la siembra inicial inmediatamente en background
-                CoroutineScope(Dispatchers.IO).launch {
-                    DatosIniciales.sembrar(instance)
-                }
-
                 instance
             }
         }

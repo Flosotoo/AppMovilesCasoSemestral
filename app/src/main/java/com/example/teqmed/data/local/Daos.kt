@@ -70,7 +70,7 @@ interface UsuarioDao {
     @Query("SELECT * FROM usuarios WHERE rut = :rut LIMIT 1")
     suspend fun obtenerPorRut(rut: String): UsuarioEntity?
 
-    @Insert(onConflict = OnConflictStrategy.ABORT)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertar(usuario: UsuarioEntity): Long
 
     @Update

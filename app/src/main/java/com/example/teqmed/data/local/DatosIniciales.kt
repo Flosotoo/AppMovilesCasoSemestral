@@ -1,13 +1,27 @@
 package com.example.teqmed.data.local
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 
 //Pre-población de datos semilla para la base de datos local SQLite Room.
 
 object DatosIniciales {
 
+    private val mutex = Mutex()
+
     suspend fun sembrar(db: TeqRutaDatabase) = withContext(Dispatchers.IO) {
+        mutex.withLock {
+            try {
+                sembrarInterno(db)
+            } catch (e: Exception) {
+                android.util.Log.e("DatosIniciales", "Error durante siembra de datos semilla: ${e.message}", e)
+            }
+        }
+    }
+
+    private suspend fun sembrarInterno(db: TeqRutaDatabase) {
         // 1. Roles y Permisos (si no existen)
         if (db.rolDao().contar() == 0) {
             val rolAdminId = db.rolDao().insertar(RolEntity(codigo = "ADMIN", nombre = "Administrador del Sistema"))
@@ -34,8 +48,20 @@ object DatosIniciales {
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pUsuarios))
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pMaestros))
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pCostos))
+        }
 
-            // 2. Usuarios semilla
+        // 2. Usuarios semilla (siempre verificando existencia para evitar UNIQUE constraints)
+        val rolAdmin = db.rolDao().obtenerPorCodigo("ADMIN")
+        val rolJefe = db.rolDao().obtenerPorCodigo("JEFE")
+        val rolTecnico = db.rolDao().obtenerPorCodigo("TECNICO")
+        val rolGerencia = db.rolDao().obtenerPorCodigo("GERENCIA")
+
+        val rolAdminId = rolAdmin?.id ?: 1L
+        val rolJefeId = rolJefe?.id ?: 2L
+        val rolTecnicoId = rolTecnico?.id ?: 3L
+        val rolGerenciaId = rolGerencia?.id ?: 4L
+
+        if (db.usuarioDao().obtenerPorEmail("admin@teqmed.cl") == null) {
             db.usuarioDao().insertar(
                 UsuarioEntity(
                     rut = "11111111-1",
@@ -48,6 +74,8 @@ object DatosIniciales {
                     consentimientoUbicacion = true
                 )
             )
+        }
+        if (db.usuarioDao().obtenerPorEmail("jefe@teqmed.cl") == null) {
             db.usuarioDao().insertar(
                 UsuarioEntity(
                     rut = "22222222-2",
@@ -60,6 +88,8 @@ object DatosIniciales {
                     consentimientoUbicacion = true
                 )
             )
+        }
+        if (db.usuarioDao().obtenerPorEmail("tecnico@teqmed.cl") == null) {
             db.usuarioDao().insertar(
                 UsuarioEntity(
                     rut = "33333333-3",
@@ -72,6 +102,8 @@ object DatosIniciales {
                     consentimientoUbicacion = true
                 )
             )
+        }
+        if (db.usuarioDao().obtenerPorEmail("gerencia@teqmed.cl") == null) {
             db.usuarioDao().insertar(
                 UsuarioEntity(
                     rut = "44444444-4",
