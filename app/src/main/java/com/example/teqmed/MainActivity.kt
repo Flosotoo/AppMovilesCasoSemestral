@@ -4,29 +4,39 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Logout
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.lifecycleScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -65,9 +75,6 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         val db = TeqRutaDatabase.getDatabase(applicationContext)
-        lifecycleScope.launch(Dispatchers.IO) {
-            DatosIniciales.sembrar(db)
-        }
         val sessionManager = SessionManager(applicationContext)
         val tarifaRepo = TarifaCombustibleRepository(ClienteTarifaCneHttp(), db.parametroSistemaDao())
         val networkMonitor = com.example.teqmed.util.LiveNetworkMonitor(applicationContext)
@@ -79,12 +86,70 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             TEQMEDTheme {
-                TeqRutaApp(
-                    db = db,
-                    sessionManager = sessionManager,
-                    tarifaRepo = tarifaRepo
-                )
+                var appInicializada by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    DatosIniciales.sembrar(db)
+                    appInicializada = true
+                }
+
+                if (!appInicializada) {
+                    SplashInicialScreen()
+                } else {
+                    TeqRutaApp(
+                        db = db,
+                        sessionManager = sessionManager,
+                        tarifaRepo = tarifaRepo
+                    )
+                }
             }
+        }
+    }
+}
+
+/**
+ * Pantalla transitoria de carga y preparación de base de datos local.
+ * Garantiza que la UI solo se monte cuando los catálogos y roles están disponibles.
+ */
+@Composable
+private fun SplashInicialScreen() {
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Surface(
+                shape = CircleShape,
+                color = MaterialTheme.colorScheme.primaryContainer,
+                modifier = Modifier.size(72.dp)
+            ) {
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = "TR",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "TeqRuta",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                text = "Iniciando sistema...",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            CircularProgressIndicator(modifier = Modifier.size(24.dp), strokeWidth = 2.dp)
         }
     }
 }
