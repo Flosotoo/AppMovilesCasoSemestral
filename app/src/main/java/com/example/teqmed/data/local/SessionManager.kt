@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 /**
- * Modelo ligero que representa la sesión activa de un usuario (HU02, HU03).
+ * Modelo ligero que representa la sesión activa de un usuario (HU02, HU03, HU04, RF-37).
  */
 data class UsuarioSesion(
     val id: Long,
@@ -16,8 +16,13 @@ data class UsuarioSesion(
     val nombre: String,
     val email: String,
     val rol: CodigoRol,
-    val consentimientoGps: Boolean
-)
+    val consentimientoGps: Boolean,
+    val permisos: Set<String> = emptySet()
+) {
+    fun tienePermiso(codigo: String): Boolean = permisos.contains(codigo)
+    fun tienePermiso(codigoPermiso: com.example.teqmed.domain.model.CodigoPermiso): Boolean =
+        permisos.contains(codigoPermiso.name)
+}
 
 /**
  * Gestor de persistencia de sesión local (HU02 / HU03).
@@ -37,7 +42,8 @@ class SessionManager(context: Context) {
         nombre: String,
         email: String,
         rol: CodigoRol,
-        consentimientoGps: Boolean
+        consentimientoGps: Boolean,
+        permisos: Set<String> = emptySet()
     ) {
         prefs.edit().apply {
             putLong(KEY_ID, id)
@@ -46,6 +52,7 @@ class SessionManager(context: Context) {
             putString(KEY_EMAIL, email)
             putString(KEY_ROL, rol.name)
             putBoolean(KEY_GPS_CONSENT, consentimientoGps)
+            putStringSet(KEY_PERMISOS, permisos)
             putBoolean(KEY_LOGGED_IN, true)
             apply()
         }
@@ -55,7 +62,8 @@ class SessionManager(context: Context) {
             nombre = nombre,
             email = email,
             rol = rol,
-            consentimientoGps = consentimientoGps
+            consentimientoGps = consentimientoGps,
+            permisos = permisos
         )
     }
 
@@ -89,6 +97,7 @@ class SessionManager(context: Context) {
             CodigoRol.TECNICO
         }
         val consent = prefs.getBoolean(KEY_GPS_CONSENT, false)
+        val permisos = prefs.getStringSet(KEY_PERMISOS, emptySet()) ?: emptySet()
 
         return UsuarioSesion(
             id = id,
@@ -96,7 +105,8 @@ class SessionManager(context: Context) {
             nombre = nombre,
             email = email,
             rol = rol,
-            consentimientoGps = consent
+            consentimientoGps = consent,
+            permisos = permisos
         )
     }
 
@@ -109,5 +119,6 @@ class SessionManager(context: Context) {
         private const val KEY_EMAIL = "user_email"
         private const val KEY_ROL = "user_rol"
         private const val KEY_GPS_CONSENT = "user_gps_consent"
+        private const val KEY_PERMISOS = "user_permisos"
     }
 }

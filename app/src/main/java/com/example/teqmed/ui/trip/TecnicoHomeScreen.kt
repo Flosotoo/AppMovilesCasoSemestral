@@ -102,17 +102,39 @@ fun TecnicoHomeScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Bienvenida
-            Column {
-                Text(
-                    text = "Hola, $tecnicoNombre",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Panel Operativo de Terreno",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            // Bienvenida y Aviso GPS (HU08, RF-38)
+            var mostrarAvisoGps by remember { mutableStateOf(false) }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = "Hola, $tecnicoNombre",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        text = "Panel Operativo de Terreno",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                IconButton(onClick = { mostrarAvisoGps = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "Aviso de Auditoría GPS",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+
+            if (mostrarAvisoGps) {
+                com.example.teqmed.ui.auth.ConsentimientoGpsDialog(
+                    onAceptar = { mostrarAvisoGps = false },
+                    onRechazar = { mostrarAvisoGps = false }
                 )
             }
 

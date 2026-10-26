@@ -126,18 +126,45 @@ class UsuariosAdminViewModel(
 
         viewModelScope.launch {
             try {
+                val rutLimpio = formValidado.rut.trim()
+                val emailLimpio = formValidado.email.trim()
+
+                // HU05 / RF-34: Validar unicidad de RUT en Room
+                val usuarioExistenteRut = usuarioDao.obtenerPorRut(rutLimpio)
+                if (usuarioExistenteRut != null) {
+                    _uiState.update {
+                        it.copy(
+                            formulario = it.formulario.copy(rutError = "Ya existe un usuario registrado con este RUT"),
+                            errorGeneral = "El RUT ingresado ya se encuentra registrado"
+                        )
+                    }
+                    return@launch
+                }
+
+                // HU05 / RF-34: Validar unicidad de Correo Electrónico en Room
+                val usuarioExistenteEmail = usuarioDao.obtenerPorEmail(emailLimpio)
+                if (usuarioExistenteEmail != null) {
+                    _uiState.update {
+                        it.copy(
+                            formulario = it.formulario.copy(emailError = "Ya existe un usuario registrado con este correo"),
+                            errorGeneral = "El correo electrónico ya se encuentra registrado"
+                        )
+                    }
+                    return@launch
+                }
+
                 val entidad = UsuarioEntity(
-                    rut = formValidado.rut.trim(),
+                    rut = rutLimpio,
                     nombre = formValidado.nombre.trim(),
-                    email = formValidado.email.trim(),
+                    email = emailLimpio,
                     hashClave = formValidado.clave.trim(),
                     rolId = formValidado.rolId!!,
                     activo = true,
-                    primerAcceso = false,
+                    primerAcceso = true,
                     consentimientoUbicacion = false
                 )
                 usuarioDao.insertar(entidad)
-                _uiState.update { it.copy(mostrandoDialogoCrear = false) }
+                _uiState.update { it.copy(mostrandoDialogoCrear = false, errorGeneral = null) }
             } catch (e: Exception) {
                 _uiState.update { it.copy(errorGeneral = "Error al crear usuario: ${e.message}") }
             }

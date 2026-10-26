@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
@@ -34,6 +36,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -263,12 +266,45 @@ fun LoginScreen(
                     label = { Text("Jefe") }
                 )
                 FilterChip(
+                    selected = state.email == "gerencia@teqmed.cl",
+                    onClick = {
+                        viewModel.onEmailChange("gerencia@teqmed.cl")
+                        viewModel.onClaveChange("gerencia123")
+                    },
+                    label = { Text("Gerencia") }
+                )
+                FilterChip(
                     selected = state.email == "admin@teqmed.cl",
                     onClick = {
                         viewModel.onEmailChange("admin@teqmed.cl")
                         viewModel.onClaveChange("admin123")
                     },
                     label = { Text("Admin") }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            var mostrarAvisoGps by remember { mutableStateOf(false) }
+
+            TextButton(onClick = { mostrarAvisoGps = true }) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.width(6.dp))
+                Text(
+                    text = "Aviso de Auditoría GPS y Privacidad (RF-38)",
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+
+            if (mostrarAvisoGps) {
+                ConsentimientoGpsDialog(
+                    onAceptar = { mostrarAvisoGps = false },
+                    onRechazar = { mostrarAvisoGps = false }
                 )
             }
         }

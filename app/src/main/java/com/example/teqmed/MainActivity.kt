@@ -111,6 +111,7 @@ fun TeqRutaApp(
             AuthViewModel(
                 usuarioDao = db.usuarioDao(),
                 rolDao = db.rolDao(),
+                rolPermisoDao = db.rolPermisoDao(),
                 sessionManager = sessionManager
             )
         }

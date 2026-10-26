@@ -15,28 +15,25 @@ object DatosIniciales {
             val rolTecnicoId = db.rolDao().insertar(RolEntity(codigo = "TECNICO", nombre = "Técnico en Terreno"))
             val rolGerenciaId = db.rolDao().insertar(RolEntity(codigo = "GERENCIA", nombre = "Gerencia y Finanzas"))
 
-            val pRegTraslado = db.permisoDao().insertar(PermisoEntity(codigo = "REGISTRAR_TRASLADO", descripcion = "Iniciar y cerrar traslados"))
-            val pVerJornada = db.permisoDao().insertar(PermisoEntity(codigo = "VER_JORNADA", descripcion = "Ver traslados de la jornada"))
-            val pValidar = db.permisoDao().insertar(PermisoEntity(codigo = "VALIDAR_TRASLADOS", descripcion = "Auditar y resolver traslados"))
-            val pReportes = db.permisoDao().insertar(PermisoEntity(codigo = "CONSULTAR_REPORTES", descripcion = "Consultar reportes de costos"))
-            val pMaestros = db.permisoDao().insertar(PermisoEntity(codigo = "ADMINISTRAR_MAESTROS", descripcion = "Mantener vehículos, destinos y tarifas"))
-            val pUsuarios = db.permisoDao().insertar(PermisoEntity(codigo = "ADMINISTRAR_USUARIOS", descripcion = "Crear y desactivar cuentas de usuario"))
+            val pRegTraslado = db.permisoDao().insertar(PermisoEntity(codigo = com.example.teqmed.domain.model.CodigoPermiso.REGISTRAR_TRASLADO.name, descripcion = "Iniciar y cerrar traslados en terreno"))
+            val pValidar = db.permisoDao().insertar(PermisoEntity(codigo = com.example.teqmed.domain.model.CodigoPermiso.VALIDAR_TRASLADO.name, descripcion = "Auditar y resolver traslados"))
+            val pCostos = db.permisoDao().insertar(PermisoEntity(codigo = com.example.teqmed.domain.model.CodigoPermiso.VER_COSTOS.name, descripcion = "Consultar reportes de costos"))
+            val pMaestros = db.permisoDao().insertar(PermisoEntity(codigo = com.example.teqmed.domain.model.CodigoPermiso.ADMIN_MAESTROS.name, descripcion = "Mantener vehículos, destinos y tarifas"))
+            val pUsuarios = db.permisoDao().insertar(PermisoEntity(codigo = com.example.teqmed.domain.model.CodigoPermiso.ADMIN_USUARIOS.name, descripcion = "Crear y desactivar cuentas de usuario"))
 
             // Asignar permisos a Técnico
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolTecnicoId, permisoId = pRegTraslado))
-            db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolTecnicoId, permisoId = pVerJornada))
 
             // Asignar permisos a Jefe
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolJefeId, permisoId = pValidar))
-            db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolJefeId, permisoId = pVerJornada))
 
             // Asignar permisos a Gerencia
-            db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolGerenciaId, permisoId = pReportes))
+            db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolGerenciaId, permisoId = pCostos))
 
             // Asignar permisos a Admin
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pUsuarios))
             db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pMaestros))
-            db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pReportes))
+            db.rolPermisoDao().insertar(RolPermisoEntity(rolId = rolAdminId, permisoId = pCostos))
 
             // 2. Usuarios semilla
             db.usuarioDao().insertar(

@@ -3,6 +3,7 @@ package com.example.teqmed.ui.auth
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.teqmed.data.local.RolDao
+import com.example.teqmed.data.local.RolPermisoDao
 import com.example.teqmed.data.local.SessionManager
 import com.example.teqmed.data.local.UsuarioDao
 import com.example.teqmed.data.local.UsuarioSesion
@@ -20,6 +21,7 @@ import kotlinx.coroutines.launch
 class AuthViewModel(
     private val usuarioDao: UsuarioDao,
     private val rolDao: RolDao,
+    private val rolPermisoDao: RolPermisoDao,
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
@@ -74,7 +76,7 @@ class AuthViewModel(
                     return@launch
                 }
 
-                // Resolución de Rol RBAC desde la base de datos
+                // Resolución de Rol RBAC desde la base de datos (RF-37)
                 val rolEntity = rolDao.obtenerPorId(usuario.rolId)
                 val codigoRol = try {
                     CodigoRol.valueOf(rolEntity?.codigo ?: CodigoRol.TECNICO.name)
@@ -82,23 +84,29 @@ class AuthViewModel(
                     CodigoRol.TECNICO
                 }
 
+                // Cargar permisos activos asignados al rol en la base de datos (RF-37)
+                val permisosLista = rolPermisoDao.obtenerCodigosPermisosDeRol(usuario.rolId)
+                val permisosSet = permisosLista.toSet()
+
                 val sesion = UsuarioSesion(
                     id = usuario.id,
                     rut = usuario.rut,
                     nombre = usuario.nombre,
                     email = usuario.email,
                     rol = codigoRol,
-                    consentimientoGps = usuario.consentimientoUbicacion
+                    consentimientoGps = usuario.consentimientoUbicacion,
+                    permisos = permisosSet
                 )
 
-                // Guardado de sesión persistente (HU02)
+                // Guardado de sesión persistente (HU02, HU04)
                 sessionManager.guardarSesion(
                     id = usuario.id,
                     rut = usuario.rut,
                     nombre = usuario.nombre,
                     email = usuario.email,
                     rol = codigoRol,
-                    consentimientoGps = usuario.consentimientoUbicacion
+                    consentimientoGps = usuario.consentimientoUbicacion,
+                    permisos = permisosSet
                 )
 
                 _uiState.update {
