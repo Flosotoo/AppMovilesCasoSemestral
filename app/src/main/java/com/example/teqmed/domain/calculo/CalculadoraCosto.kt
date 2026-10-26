@@ -37,7 +37,8 @@ object CalculadoraCosto {
         val desviacion = DetectorDesviacion.evaluar(
             declarada = s.kilometrosDeclarados,
             oficial = s.distanciaOficialKm,
-            umbralPorcentaje = s.umbralDesviacionPct
+            umbralPorcentaje = s.umbralDesviacionPct,
+            umbralKmAbsoluto = s.umbralDesviacionKmAbsoluto
         )
 
         return Result.success(

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocalHospital
 import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.Icon
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
@@ -21,16 +22,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 
 /**
- * Pantalla principal del Administrador del Sistema con pestañas maestras (HU05, HU06, HU34, HU35).
+ * Pantalla principal del Administrador del Sistema con pestañas maestras (HU05, HU06, HU19, HU34, HU35, HU36).
  */
 @Composable
 fun AdminHomeScreen(
     destinosViewModel: DestinosAdminViewModel,
     vehiculosViewModel: VehiculosAdminViewModel,
-    usuariosViewModel: UsuariosAdminViewModel
+    usuariosViewModel: UsuariosAdminViewModel,
+    parametrosViewModel: ParametrosAdminViewModel
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
-    val tabs = listOf("Destinos", "Vehículos", "Usuarios")
+    val tabs = listOf("Destinos", "Vehículos", "Usuarios", "Tarifas")
 
     Scaffold { paddingValues ->
         Column(
@@ -51,7 +53,8 @@ fun AdminHomeScreen(
                             when (index) {
                                 0 -> Icon(Icons.Default.LocalHospital, contentDescription = null)
                                 1 -> Icon(Icons.Default.DirectionsCar, contentDescription = null)
-                                else -> Icon(Icons.Default.People, contentDescription = null)
+                                2 -> Icon(Icons.Default.People, contentDescription = null)
+                                else -> Icon(Icons.Default.Tune, contentDescription = null)
                             }
                         }
                     )
@@ -62,6 +65,7 @@ fun AdminHomeScreen(
                 0 -> DestinosAdminScreen(destinosViewModel)
                 1 -> VehiculosAdminScreen(vehiculosViewModel)
                 2 -> UsuariosAdminScreen(usuariosViewModel)
+                3 -> ParametrosAdminScreen(parametrosViewModel)
             }
         }
     }

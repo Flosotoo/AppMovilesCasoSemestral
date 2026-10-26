@@ -289,11 +289,18 @@ fun TeqRutaApp(
                         val destinosViewModel = remember { DestinosAdminViewModel(db.destinoDao()) }
                         val vehiculosViewModel = remember { VehiculosAdminViewModel(db.vehiculoDao()) }
                         val usuariosViewModel = remember { UsuariosAdminViewModel(db.usuarioDao(), db.rolDao()) }
+                        val parametrosViewModel = remember {
+                            com.example.teqmed.ui.admin.ParametrosAdminViewModel(
+                                parametroDao = db.parametroSistemaDao(),
+                                tarifaRepo = tarifaRepo
+                            )
+                        }
 
                         AdminHomeScreen(
                             destinosViewModel = destinosViewModel,
                             vehiculosViewModel = vehiculosViewModel,
-                            usuariosViewModel = usuariosViewModel
+                            usuariosViewModel = usuariosViewModel,
+                            parametrosViewModel = parametrosViewModel
                         )
                     }
 

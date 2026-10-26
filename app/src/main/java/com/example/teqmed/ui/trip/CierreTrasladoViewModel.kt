@@ -121,6 +121,10 @@ class CierreTrasladoViewModel(
                     TipoParametro.UMBRAL_DESVIACION_PORCENTAJE.name
                 )?.valor ?: com.example.teqmed.domain.model.Desviacion.UMBRAL_PCT_DEFECTO
 
+                val umbralKm = parametroDao?.obtenerPorTipo(
+                    TipoParametro.UMBRAL_DESVIACION_KM_ABSOLUTO.name
+                )?.valor ?: com.example.teqmed.domain.model.Desviacion.UMBRAL_KM_ABSOLUTO
+
                 // 2. Entrada al motor de cálculo algorítmico unificado (RN02)
                 val solicitud = SolicitudCalculo(
                     kilometrosDeclarados = distanciaDeclarada,
@@ -129,7 +133,8 @@ class CierreTrasladoViewModel(
                     rendimientoKmL = rendimientoKmL,
                     montoPeaje = montoTotalPeajes,
                     precioLitroVigente = precioLitro,
-                    umbralDesviacionPct = umbralPct
+                    umbralDesviacionPct = umbralPct,
+                    umbralDesviacionKmAbsoluto = umbralKm
                 )
 
                 val resultadoCalculo = CalculadoraCosto.calcular(solicitud).getOrThrow()

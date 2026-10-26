@@ -6,16 +6,16 @@ import kotlin.math.abs
  * Auditoria bidireccional de distancia (RN03, RF-11).
  *
  * Se marca desviacion si se cumple CUALQUIERA de las dos condiciones:
- *   - El porcentaje absoluto supera el umbral (por defecto 10%)
- *   - La diferencia absoluta supera los 5 km
+ *   - El porcentaje absoluto supera el umbral porcentual (por defecto 10%)
+ *   - La diferencia absoluta supera el umbral en km (por defecto 5 km)
  *
- * El signo se conserva para distinguir exceso (posible desvio de ruta)
- * de defecto (posible error de digitacion que subvalora el costo).
+ * Ambos umbrales son configurables en Room mediante HU36.
  */
 data class Desviacion(
     val distanciaDeclarada: Double,
     val distanciaOficial: Double,
-    val umbralPorcentaje: Double = UMBRAL_PCT_DEFECTO
+    val umbralPorcentaje: Double = UMBRAL_PCT_DEFECTO,
+    val umbralKmAbsoluto: Double = UMBRAL_KM_ABSOLUTO
 ) {
     val diferenciaKm: Double = distanciaDeclarada - distanciaOficial
 
@@ -26,7 +26,7 @@ data class Desviacion(
     val porcentajeAbsoluto: Double = abs(porcentajeConSigno)
 
     val superaUmbral: Boolean =
-        porcentajeAbsoluto > umbralPorcentaje || abs(diferenciaKm) > UMBRAL_KM_ABSOLUTO
+        porcentajeAbsoluto > umbralPorcentaje || abs(diferenciaKm) > umbralKmAbsoluto
 
     val esPorExceso: Boolean = superaUmbral && diferenciaKm > 0
     val esPorDefecto: Boolean = superaUmbral && diferenciaKm < 0

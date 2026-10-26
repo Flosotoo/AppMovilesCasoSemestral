@@ -12,10 +12,12 @@ object DetectorDesviacion {
     fun evaluar(
         declarada: Double,
         oficial: Double,
-        umbralPorcentaje: Double = Desviacion.UMBRAL_PCT_DEFECTO
+        umbralPorcentaje: Double = Desviacion.UMBRAL_PCT_DEFECTO,
+        umbralKmAbsoluto: Double = Desviacion.UMBRAL_KM_ABSOLUTO
     ): Desviacion = Desviacion(
         distanciaDeclarada = declarada,
         distanciaOficial = oficial,
-        umbralPorcentaje = umbralPorcentaje
+        umbralPorcentaje = umbralPorcentaje,
+        umbralKmAbsoluto = umbralKmAbsoluto
     )
 }

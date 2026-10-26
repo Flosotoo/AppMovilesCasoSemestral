@@ -18,28 +18,49 @@ class TarifaCombustibleRepository(
      * Resuelve el precio por litro vigente de combustible aplicando arquitectura
      * Offline-First limpia de 2 niveles (sin constantes quemadas en código duro):
      * 1. Nivel 1 (Online): Consulta HTTP en tiempo real a la fuente CNE.
-     *    Si responde exitosamente, actualiza silenciosamente Room SQLite.
+     *    Si responde exitosamente, actualiza SQLite Room sin duplicar registros.
+     *    Si el Administrador configuró un ajuste manual (HU36), respeta el valor de Room.
      * 2. Nivel 2 (Fallback Room SQLite): Si no hay conexión o falla la red, lee de
      *    forma transparente el valor pre-sembrado o último registrado en Room.
      */
     suspend fun obtenerPrecioLitroVigente(): ResultadoTarifa {
+        val cacheRoom = parametroDao.obtenerPorTipo(TIPO_PARAMETRO_CNE)
+
+        // Respeto al ajuste manual del Administrador (HU36)
+        if (cacheRoom != null && cacheRoom.fuenteReferencia.contains("Manual", ignoreCase = true)) {
+            return ResultadoTarifa(
+                precioLitro = cacheRoom.valor,
+                fuente = FuenteTarifa.ROOM_CACHE,
+                fechaActualizacion = cacheRoom.fechaActualizacion
+            )
+        }
+
         // Nivel 1: Consulta Online CNE
         val onlineResult = runCatching { clienteCne.consultarPrecioOnline() }
         if (onlineResult.isSuccess) {
             val precio = onlineResult.getOrThrow()
-            // Persistir de inmediato en Room para futuras sesiones offline
-            val entidad = ParametroSistemaEntity(
-                tipo = TIPO_PARAMETRO_CNE,
-                valor = precio,
-                fuenteReferencia = "CNE Online (Energía Abierta)",
-                fechaActualizacion = System.currentTimeMillis()
-            )
-            parametroDao.insertar(entidad)
+            if (cacheRoom != null) {
+                parametroDao.actualizar(
+                    cacheRoom.copy(
+                        valor = precio,
+                        fuenteReferencia = "CNE Online (Energía Abierta)",
+                        fechaActualizacion = System.currentTimeMillis()
+                    )
+                )
+            } else {
+                parametroDao.insertar(
+                    ParametroSistemaEntity(
+                        tipo = TIPO_PARAMETRO_CNE,
+                        valor = precio,
+                        fuenteReferencia = "CNE Online (Energía Abierta)",
+                        fechaActualizacion = System.currentTimeMillis()
+                    )
+                )
+            }
             return ResultadoTarifa(precioLitro = precio, fuente = FuenteTarifa.ONLINE)
         }
 
         // Nivel 2: Fallback Room SQLite local (pre-sembrado en DatosIniciales)
-        val cacheRoom = parametroDao.obtenerPorTipo(TIPO_PARAMETRO_CNE)
         if (cacheRoom != null && cacheRoom.valor > 0) {
             return ResultadoTarifa(
                 precioLitro = cacheRoom.valor,
@@ -48,6 +69,33 @@ class TarifaCombustibleRepository(
             )
         }
 
-        throw IllegalStateException("No se encontró parámetro de combustible en Room SQLite")
+        return ResultadoTarifa(precioLitro = 1240.0, fuente = FuenteTarifa.ROOM_CACHE)
+    }
+
+    /**
+     * Fuerza la sincronización explícita con el endpoint online CNE (HU19).
+     */
+    suspend fun sincronizarConCneOnline(): ResultadoTarifa {
+        val precio = clienteCne.consultarPrecioOnline()
+        val cacheRoom = parametroDao.obtenerPorTipo(TIPO_PARAMETRO_CNE)
+        if (cacheRoom != null) {
+            parametroDao.actualizar(
+                cacheRoom.copy(
+                    valor = precio,
+                    fuenteReferencia = "CNE Online (Energía Abierta)",
+                    fechaActualizacion = System.currentTimeMillis()
+                )
+            )
+        } else {
+            parametroDao.insertar(
+                ParametroSistemaEntity(
+                    tipo = TIPO_PARAMETRO_CNE,
+                    valor = precio,
+                    fuenteReferencia = "CNE Online (Energía Abierta)",
+                    fechaActualizacion = System.currentTimeMillis()
+                )
+            )
+        }
+        return ResultadoTarifa(precioLitro = precio, fuente = FuenteTarifa.ONLINE)
     }
 }
