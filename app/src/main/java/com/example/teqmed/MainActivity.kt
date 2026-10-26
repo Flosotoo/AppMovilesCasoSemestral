@@ -70,6 +70,12 @@ class MainActivity : ComponentActivity() {
         }
         val sessionManager = SessionManager(applicationContext)
         val tarifaRepo = TarifaCombustibleRepository(ClienteTarifaCneHttp(), db.parametroSistemaDao())
+        val networkMonitor = com.example.teqmed.util.LiveNetworkMonitor(applicationContext)
+        val sincronizador = com.example.teqmed.data.sync.SincronizadorTraslados(
+            trasladoDao = db.trasladoDao(),
+            networkMonitor = networkMonitor,
+            coroutineScope = lifecycleScope
+        )
 
         setContent {
             TEQMEDTheme {

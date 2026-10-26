@@ -150,7 +150,8 @@ class CierreTrasladoViewModel(
                             tarifaKmAplicada = null,
                             porcentajeDesviacion = resultadoCalculo.desviacion.porcentajeConSigno,
                             desviacionDetectada = resultadoCalculo.desviacion.superaUmbral,
-                            estado = "FINALIZADO"
+                            estado = "FINALIZADO",
+                            estadoSincronizacion = "PENDIENTE_OFFLINE"
                         )
                         dao.actualizar(actualizado)
                     }

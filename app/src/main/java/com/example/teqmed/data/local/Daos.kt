@@ -181,6 +181,9 @@ interface TrasladoDao {
     @Query("SELECT * FROM traslados WHERE estado_sincronizacion = 'PENDIENTE_OFFLINE'")
     fun obtenerPendientesSincronizacion(): Flow<List<TrasladoEntity>>
 
+    @Query("SELECT * FROM traslados WHERE estado_sincronizacion = 'PENDIENTE_OFFLINE'")
+    suspend fun obtenerListaPendientesSincronizacion(): List<TrasladoEntity>
+
     @Query("SELECT * FROM traslados WHERE estado = 'FINALIZADO' ORDER BY timestamp_inicio DESC")
     fun obtenerFinalizadosParaBandeja(): Flow<List<TrasladoEntity>>
 

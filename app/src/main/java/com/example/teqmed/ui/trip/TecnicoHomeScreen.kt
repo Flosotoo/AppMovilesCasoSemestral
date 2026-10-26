@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -205,16 +207,53 @@ fun TecnicoHomeScreen(
                                         fontWeight = FontWeight.SemiBold,
                                         style = MaterialTheme.typography.bodyLarge
                                     )
-                                    Text(
-                                        text = item.estado,
-                                        style = MaterialTheme.typography.labelSmall,
-                                        fontWeight = FontWeight.Bold,
-                                        color = when (item.estado) {
-                                            EstadoTraslado.VALIDADO.name -> MaterialTheme.colorScheme.primary
-                                            EstadoTraslado.OBSERVADO.name -> MaterialTheme.colorScheme.error
-                                            else -> MaterialTheme.colorScheme.outline
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                    ) {
+                                        if (item.estadoSincronizacion == "SINCRONIZADO") {
+                                            Icon(
+                                                imageVector = Icons.Default.CloudDone,
+                                                contentDescription = "Sincronizado",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Text(
+                                                text = "Sincronizado",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = Icons.Default.CloudOff,
+                                                contentDescription = "Pendiente",
+                                                tint = MaterialTheme.colorScheme.outline,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Text(
+                                                text = "Pendiente",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.outline
+                                            )
                                         }
-                                    )
+
+                                        Text(
+                                            text = "·",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.outline
+                                        )
+
+                                        Text(
+                                            text = item.estado,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                            color = when (item.estado) {
+                                                EstadoTraslado.VALIDADO.name -> MaterialTheme.colorScheme.primary
+                                                EstadoTraslado.OBSERVADO.name -> MaterialTheme.colorScheme.error
+                                                else -> MaterialTheme.colorScheme.outline
+                                            }
+                                        )
+                                    }
                                 }
                                 Spacer(modifier = Modifier.height(4.dp))
                                 Row(
