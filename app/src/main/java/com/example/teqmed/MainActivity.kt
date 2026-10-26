@@ -276,6 +276,7 @@ fun TeqRutaApp(
                             JefeHomeViewModel(
                                 trasladoDao = db.trasladoDao(),
                                 destinoDao = db.destinoDao(),
+                                usuarioDao = db.usuarioDao(),
                                 jefeId = sesion.id
                             )
                         }

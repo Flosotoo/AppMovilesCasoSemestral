@@ -6,7 +6,9 @@ import com.example.teqmed.data.local.DestinoDao
 import com.example.teqmed.data.local.DestinoEntity
 import com.example.teqmed.data.local.TrasladoDao
 import com.example.teqmed.data.local.TrasladoEntity
+import com.example.teqmed.data.local.UsuarioDao
 import com.example.teqmed.domain.model.DecisionValidacion
+import com.example.teqmed.domain.model.EstadoTraslado
 import com.example.teqmed.domain.validator.ValidadorResolucion
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -17,17 +19,32 @@ import kotlinx.coroutines.launch
 data class JefeHomeUiState(
     val traslados: List<TrasladoEntity> = emptyList(),
     val destinosMap: Map<Long, DestinoEntity> = emptyMap(),
+    val usuariosMap: Map<Long, String> = emptyMap(),
+    val verSoloPendientes: Boolean = true,
     val trasladoParaResolver: TrasladoEntity? = null,
     val decisionSeleccionada: DecisionValidacion = DecisionValidacion.VALIDADO,
     val comentario: String = "",
     val comentarioError: String? = null,
     val guardando: Boolean = false,
     val errorGeneral: String? = null
-)
+) {
+    /**
+     * Bandeja activa según HU26:
+     * CA1: En la bandeja aparecen los traslados finalizados del equipo.
+     * CA2: Los traslados ya resueltos salen de la bandeja.
+     */
+    val trasladosVisibles: List<TrasladoEntity>
+        get() = if (verSoloPendientes) {
+            traslados.filter { it.estado == EstadoTraslado.FINALIZADO.name }
+        } else {
+            traslados.filter { it.estado != EstadoTraslado.FINALIZADO.name && it.estado != EstadoTraslado.EN_CURSO.name }
+        }
+}
 
 class JefeHomeViewModel(
     private val trasladoDao: TrasladoDao,
     private val destinoDao: DestinoDao,
+    private val usuarioDao: UsuarioDao,
     private val jefeId: Long
 ) : ViewModel() {
 
@@ -49,6 +66,15 @@ class JefeHomeViewModel(
                 _uiState.update { it.copy(destinosMap = lista.associateBy { d -> d.id }) }
             }
         }
+        viewModelScope.launch {
+            usuarioDao.obtenerTodos().collect { usuarios ->
+                _uiState.update { it.copy(usuariosMap = usuarios.associateBy({ u -> u.id }, { u -> u.nombre })) }
+            }
+        }
+    }
+
+    fun onFiltroPendientesChange(soloPendientes: Boolean) {
+        _uiState.update { it.copy(verSoloPendientes = soloPendientes) }
     }
 
     fun abrirDialogoResolucion(traslado: TrasladoEntity) {
