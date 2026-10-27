@@ -40,6 +40,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,6 +82,12 @@ fun CierreTrasladoScreen(
 
     // Helper GPS
     val locationHelper = remember { LocationHelper(context) }
+
+    LaunchedEffect(state.trasladoCerradoExitoso) {
+        if (state.trasladoCerradoExitoso) {
+            onTrasladoFinalizado()
+        }
+    }
 
     Scaffold { paddingValues ->
         Column(
@@ -134,6 +141,30 @@ fun CierreTrasladoScreen(
                             }
                         }
                     )
+
+                    // Alerta reactiva de desvío y tramo conforme (HU20 -> RF-11)
+                    if (state.alertaDesvio != null) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = if (state.desvioSuperaUmbral)
+                                    MaterialTheme.colorScheme.errorContainer
+                                else
+                                    MaterialTheme.colorScheme.secondaryContainer
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = state.alertaDesvio!!,
+                                modifier = Modifier.padding(12.dp),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (state.desvioSuperaUmbral)
+                                    MaterialTheme.colorScheme.onErrorContainer
+                                else
+                                    MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                        }
+                    }
                 }
             }
 
@@ -353,12 +384,7 @@ fun CierreTrasladoScreen(
 
             // Botón Finalizar
             Button(
-                onClick = {
-                    viewModel.cerrarTraslado()
-                    if (state.trasladoCerradoExitoso) {
-                        onTrasladoFinalizado()
-                    }
-                },
+                onClick = { viewModel.cerrarTraslado() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),
