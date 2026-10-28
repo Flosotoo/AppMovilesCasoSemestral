@@ -64,7 +64,7 @@ fun ParametrosAdminScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Configuración del precio CNE y umbrales de auditoría en Room SQLite (HU36)",
+                text = "Configuración de tarifas de combustible y tolerancias de auditoría",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -93,7 +93,7 @@ fun ParametrosAdminScreen(
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = state.fuentePrecio.ifBlank { "Room SQLite Local" },
+                        text = state.fuentePrecio.ifBlank { "Base de datos local" },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -127,7 +127,7 @@ fun ParametrosAdminScreen(
                     supportingText = {
                         state.precioLitroError?.let {
                             Text(text = it, color = MaterialTheme.colorScheme.error)
-                        } ?: Text("Tarifa oficial aplicada en la fórmula unificada RN02")
+                        } ?: Text("Tarifa de referencia oficial para el cálculo de consumo")
                     },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
@@ -248,7 +248,7 @@ fun ParametrosAdminScreen(
             } else {
                 Icon(Icons.Default.Save, contentDescription = null)
                 Spacer(modifier = Modifier.size(8.dp))
-                Text("Guardar Parámetros en Room")
+                Text("Guardar parámetros")
             }
         }
 
@@ -261,7 +261,7 @@ fun ParametrosAdminScreen(
         ) {
             Icon(Icons.Default.CloudSync, contentDescription = null)
             Spacer(modifier = Modifier.size(8.dp))
-            Text("Sincronizar con CNE en Línea (HU19)")
+            Text("Sincronizar con CNE en línea")
         }
     }
 }

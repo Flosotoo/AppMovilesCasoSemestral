@@ -49,7 +49,7 @@ class ParametrosAdminViewModel(
                 _uiState.update {
                     it.copy(
                         precioLitro = pCombustible?.valor?.toInt()?.toString() ?: "1240",
-                        fuentePrecio = pCombustible?.fuenteReferencia ?: "Room SQLite",
+                        fuentePrecio = pCombustible?.fuenteReferencia ?: "Tarifa local",
                         umbralPct = pUmbralPct?.valor?.toString() ?: "10.0",
                         umbralKm = pUmbralKm?.valor?.toString() ?: "5.0",
                         cargando = false
@@ -117,7 +117,7 @@ class ParametrosAdminViewModel(
                     it.copy(
                         cargando = false,
                         fuentePrecio = "Ajuste Manual Administrador",
-                        mensajeExito = "Tarifas y umbrales actualizados en Room SQLite. Se aplican de inmediato sin reiniciar."
+                        mensajeExito = "Parámetros actualizados exitosamente. Se aplicarán a los nuevos traslados."
                     )
                 }
             } catch (e: Exception) {
@@ -143,7 +143,7 @@ class ParametrosAdminViewModel(
                 _uiState.update {
                     it.copy(
                         cargando = false,
-                        errorGeneral = "No fue posible conectar con CNE en línea. Se mantiene el valor local de Room."
+                        errorGeneral = "No fue posible conectar con CNE en línea. Se mantiene la tarifa configurada localmente."
                     )
                 }
             }

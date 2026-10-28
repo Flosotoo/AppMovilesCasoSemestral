@@ -113,7 +113,7 @@ class CierreTrasladoViewModel(
                     ?: parametroDao?.obtenerPorTipo(TipoParametro.PRECIO_COMBUSTIBLE_LITRO_CNE.name)?.valor
 
                 if (precioLitro == null || precioLitro <= 0.0) {
-                    _uiState.update { it.copy(guardando = false, errorGeneral = "Parámetro de combustible CNE no disponible en Room") }
+                    _uiState.update { it.copy(guardando = false, errorGeneral = "Tarifa de combustible no disponible en el sistema") }
                     return@launch
                 }
 
