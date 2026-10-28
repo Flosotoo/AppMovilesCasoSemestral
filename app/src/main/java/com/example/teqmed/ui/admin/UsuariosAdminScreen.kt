@@ -75,12 +75,12 @@ fun UsuariosAdminScreen(
         ) {
             item {
                 Text(
-                    text = "Control de Usuarios y Roles (RBAC)",
+                    text = "Control de Usuarios y Roles",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Gestión de acceso y baja lógica de cuentas sin eliminación física",
+                    text = "Administración de cuentas, roles y permisos de acceso",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

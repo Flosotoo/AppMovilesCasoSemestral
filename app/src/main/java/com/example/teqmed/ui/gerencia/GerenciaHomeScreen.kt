@@ -65,7 +65,7 @@ fun GerenciaHomeScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            text = "Gerencia y Finanzas — $gerenteNombre",
+                            text = "Gerencia y Finanzas - $gerenteNombre",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.85f)
                         )

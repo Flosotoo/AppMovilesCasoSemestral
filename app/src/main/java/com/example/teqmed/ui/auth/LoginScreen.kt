@@ -110,7 +110,7 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.primary
             )
             Text(
-                text = "Gestión de Traslados en Terreno — TEQMED SpA",
+                text = "Gestión de traslados",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -237,9 +237,9 @@ fun LoginScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Atajos de prueba rápida para Live Coding / Defensa (Parcial 3)
+            // Cuentas demo preconfiguradas para pruebas y demostración
             Text(
-                text = "Acceso Rápido para Pruebas (Semillas):",
+                text = "Cuentas demo:",
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -296,7 +296,7 @@ fun LoginScreen(
                 )
                 Spacer(modifier = Modifier.width(6.dp))
                 Text(
-                    text = "Aviso de Auditoría GPS y Privacidad (RF-38)",
+                    text = "Aviso de privacidad y ubicación",
                     style = MaterialTheme.typography.bodySmall
                 )
             }

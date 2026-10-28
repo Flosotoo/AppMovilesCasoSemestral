@@ -246,7 +246,7 @@ fun InicioTrasladoScreen(
                         onExpandedChange = { expandedVehiculo = !expandedVehiculo }
                     ) {
                         OutlinedTextField(
-                            value = vehiculoSeleccionado?.let { "${it.patente} — ${it.marca} ${it.modelo} (${it.propiedad})" } ?: "",
+                            value = vehiculoSeleccionado?.let { "${it.patente} - ${it.marca} ${it.modelo} (${it.propiedad})" } ?: "",
                             onValueChange = {},
                             readOnly = true,
                             label = { Text("Seleccione Móvil de la Flota") },

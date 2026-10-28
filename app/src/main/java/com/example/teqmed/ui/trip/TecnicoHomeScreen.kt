@@ -125,7 +125,7 @@ fun TecnicoHomeScreen(
                 IconButton(onClick = { mostrarAvisoGps = true }) {
                     Icon(
                         imageVector = Icons.Default.Info,
-                        contentDescription = "Aviso de Auditoría GPS",
+                        contentDescription = "Aviso de privacidad y ubicación",
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

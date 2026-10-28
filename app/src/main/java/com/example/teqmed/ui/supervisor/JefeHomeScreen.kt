@@ -67,7 +67,7 @@ fun JefeHomeScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Auditoría de traslados y resolución de desvíos — $jefeNombre",
+                    text = "Auditoría de traslados y resolución de desvíos - $jefeNombre",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
