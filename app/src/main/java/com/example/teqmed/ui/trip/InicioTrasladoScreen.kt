@@ -1,5 +1,8 @@
 package com.example.teqmed.ui.trip
 
+import android.Manifest
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,6 +23,7 @@ import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -35,6 +39,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -70,9 +75,9 @@ fun InicioTrasladoScreen(
 
     var expandedDestino by remember { mutableStateOf(false) }
     var expandedVehiculo by remember { mutableStateOf(false) }
+    var mostrarDialogoPermisoGps by remember { mutableStateOf(false) }
 
-    // Captura inicial defensiva de ubicación al ingresar a la pantalla (HU11)
-    LaunchedEffect(Unit) {
+    val capturarUbicacionSegura: () -> Unit = {
         scope.launch {
             val location = locationHelper.obtenerUbicacionActual()
             if (location != null) {
@@ -81,10 +86,79 @@ fun InicioTrasladoScreen(
         }
     }
 
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permisos ->
+        val concedido = permisos[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            permisos[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (concedido) {
+            capturarUbicacionSegura()
+        } else {
+            mostrarDialogoPermisoGps = true
+        }
+    }
+
+    val solicitarOCapturarGps: () -> Unit = {
+        if (locationHelper.tienePermisoUbicacion()) {
+            capturarUbicacionSegura()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    // Captura inicial defensiva de ubicación al ingresar a la pantalla (HU11)
+    LaunchedEffect(Unit) {
+        if (locationHelper.tienePermisoUbicacion()) {
+            capturarUbicacionSegura()
+        } else {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
     LaunchedEffect(state.trasladoIniciadoId) {
         state.trasladoIniciadoId?.let { id ->
             onTrasladoIniciado(id)
         }
+    }
+
+    if (mostrarDialogoPermisoGps) {
+        AlertDialog(
+            onDismissRequest = { mostrarDialogoPermisoGps = false },
+            title = { Text("Permiso de Ubicación Requerido") },
+            text = {
+                Text("Para adjuntar la ubicación GPS al iniciar el traslado es necesario permitir el acceso a la ubicación del dispositivo.")
+            },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        mostrarDialogoPermisoGps = false
+                        locationPermissionLauncher.launch(
+                            arrayOf(
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                            )
+                        )
+                    }
+                ) {
+                    Text("Solicitar Permiso")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { mostrarDialogoPermisoGps = false }) {
+                    Text("Continuar sin GPS")
+                }
+            }
+        )
     }
 
     val destinoSeleccionado = state.destinosDisponibles.find { it.id == state.destinoSeleccionadoId }
@@ -113,14 +187,7 @@ fun InicioTrasladoScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 SuggestionChip(
-                    onClick = {
-                        scope.launch {
-                            val location = locationHelper.obtenerUbicacionActual()
-                            if (location != null) {
-                                viewModel.onUbicacionCapturada(location.latitude, location.longitude)
-                            }
-                        }
-                    },
+                    onClick = { solicitarOCapturarGps() },
                     icon = {
                         Icon(
                             Icons.Default.LocationOn,
